@@ -1,0 +1,93 @@
+[project]
+name = "menu-rest-api"
+version = "0.1.0"
+description = "REST API for Menu Project"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django==5.2.8",
+    "django-cors-headers>=4.9.0",
+    "django-environ>=0.12.0",
+    "django-filter>=25.2",
+    "djangorestframework>=3.16.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "drf-spectacular>=0.29.0",
+    "pillow>=12.0.0",
+    "psycopg[binary]>=3.2.13",
+]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.12.0",
+    "django-debug-toolbar>=6.1.0",
+    "django-stubs>=5.2.7",
+    "djangorestframework-stubs>=3.16.5",
+    "factory-boy>=3.3.3",
+    "ipython>=9.7.0",
+    "mypy>=1.18.2",
+    "pre-commit>=4.5.0",
+    "pytest>=9.0.1",
+    "pytest-django>=4.11.1",
+    "ruff>=0.14.6",
+    "types-pyyaml>=6.0.12.20250915",
+    "types-requests>=2.32.4.20250913",
+]
+
+# --- KONFIGURACJA NARZĘDZI ---
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+exclude = [
+    ".git",
+    "__pycache__",
+    "migrations",
+    ".venv",
+    "venv",
+    "env",
+    "node_modules",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort
+    "C90", # mccabe
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    "DJ",  # flake8-django
+    "T20", # flake8-print
+    "SIM", # flake8-simplify
+    "RUF", # Ruff specific rules
+]
+ignore = [
+    "B008", # Pozwala na Depends() / models.SET_NULL w argumentach
+    "A003", # Pozwala na nazywanie pól 'id' w modelach
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "app.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "app.settings"
