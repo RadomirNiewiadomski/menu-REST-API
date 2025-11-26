@@ -1,0 +1,35 @@
+FROM python:3.12-slim-bookworm
+
+# Copy uv from the official image (trick to avoid manual installation)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    # Configure uv to install packages into the system python (not in .venv),
+    # because the container itself provides isolation.
+    UV_SYSTEM_PYTHON=1
+
+WORKDIR /app
+
+# Copy dependency files first (to leverage Docker cache layers)
+COPY pyproject.toml uv.lock ./
+
+ARG DEV=false
+
+# Install dependencies based on the DEV argument
+# If DEV=true, install everything (including dev dependencies).
+# If DEV=false, install only production dependencies.
+RUN if [ "$DEV" = "true" ]; then \
+        uv sync --frozen; \
+    else \
+        uv sync --frozen --no-dev; \
+    fi
+
+# Copy the rest of the application code
+COPY . .
+
+# Create a non-root user for security
+RUN adduser --disabled-password --no-create-home django-user
+USER django-user
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.wsgi:application"]

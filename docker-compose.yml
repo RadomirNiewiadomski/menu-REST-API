@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app  # Map the entire current directory to enable Hot Reload for all files
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DJANGO_DEBUG=1
+      - DJANGO_SECRET_KEY=dev_secret_key
+      - DJANGO_ALLOWED_HOSTS=127.0.0.1,0.0.0.0,localhost
