@@ -16,9 +16,6 @@ COPY pyproject.toml uv.lock ./
 
 ARG DEV=false
 
-# Install dependencies based on the DEV argument
-# If DEV=true, install everything (including dev dependencies).
-# If DEV=false, install only production dependencies.
 RUN if [ "$DEV" = "true" ]; then \
         uv sync --frozen; \
     else \
