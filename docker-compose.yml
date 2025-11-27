@@ -7,10 +7,35 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app/app  # Map the entire current directory to enable Hot Reload for all files
+      - .:/app  # Map the entire current directory to enable Hot Reload for all files
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     environment:
+      - DATABASE_URL=postgres://postgres:supersecretpassword@db:5432/app_db
       - DJANGO_DEBUG=1
       - DJANGO_SECRET_KEY=dev_secret_key
       - DJANGO_ALLOWED_HOSTS=127.0.0.1,0.0.0.0,localhost
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=app_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=supersecretpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

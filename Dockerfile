@@ -5,9 +5,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    # Configure uv to install packages into the system python (not in .venv),
-    # because the container itself provides isolation.
-    UV_SYSTEM_PYTHON=1
+    UV_PROJECT_ENVIRONMENT="/usr/local"
 
 WORKDIR /app
 

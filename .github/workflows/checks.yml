@@ -45,7 +45,7 @@ jobs:
     # This creates a real database available at localhost:5432 for tests
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:17-alpine
         env:
           POSTGRES_DB: app_db
           POSTGRES_USER: postgres
