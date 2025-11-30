@@ -9,6 +9,7 @@ from menu import views
 
 router = DefaultRouter()
 router.register("menus", views.MenuViewSet)
+router.register("dishes", views.DishViewSet)
 
 app_name = "menu"
 

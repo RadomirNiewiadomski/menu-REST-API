@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from menu.models import Menu
+from menu.models import Dish, Menu
 from menu.serializers import MenuSerializer
 
 MENU_URL = reverse("menu:menu-list")
@@ -63,6 +63,55 @@ class TestPublicMenuApi:
         res = client.post(MENU_URL, payload)
 
         assert res.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_retrieve_menus_filtered_by_name(self, client):
+        """Test filtering menus by name."""
+        m1 = Menu.objects.create(name="Vegetarian", description="No meat")
+        m2 = Menu.objects.create(name="Carnivore", description="Meat only")
+
+        res = client.get(MENU_URL, {"name": "Vegetarian"})
+
+        assert res.status_code == status.HTTP_200_OK
+        assert len(res.data) == 1
+        assert res.data[0]["name"] == m1.name
+        assert m2.id != res.data[0]["id"]
+
+    def test_retrieve_menus_search(self, client):
+        """Test searching menus."""
+        m1 = Menu.objects.create(name="Lunch Special", description="Cheap")
+        m2 = Menu.objects.create(name="Dinner Deluxe", description="Expensive")
+
+        res = client.get(MENU_URL, {"search": "Lunch"})
+        assert len(res.data) == 1
+        assert res.data[0]["name"] == m1.name
+        assert m2.name not in [res.data[0]["name"]]
+
+    def test_sort_menus_by_dishes_count(self, client):
+        """Test sorting menus by number of dishes."""
+        m_empty = Menu.objects.create(name="Empty")
+        m_full = Menu.objects.create(name="Full")
+
+        Dish.objects.create(menu=m_full, name="D1", price=10, prep_time=5)
+        Dish.objects.create(menu=m_full, name="D2", price=10, prep_time=5)
+
+        res = client.get(MENU_URL, {"ordering": "-dishes_count"})
+
+        assert res.status_code == status.HTTP_200_OK
+        assert len(res.data) == 2
+        assert res.data[0]["name"] == m_full.name
+        assert res.data[1]["name"] == m_empty.name
+
+    def test_list_menus_only_non_empty(self, client):
+        """Test listing only non-empty menus (optional requirement check)."""
+        m_empty = Menu.objects.create(name="Empty")
+        m_full = Menu.objects.create(name="Full")
+        Dish.objects.create(menu=m_full, name="D1", price=10, prep_time=5)
+
+        res = client.get(MENU_URL, {"non_empty": "1"})
+
+        assert len(res.data) == 1
+        assert res.data[0]["name"] == m_full.name
+        assert m_empty.name != res.data[0]["name"]
 
 
 @pytest.mark.django_db

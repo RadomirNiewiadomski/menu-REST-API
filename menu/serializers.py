@@ -4,7 +4,36 @@ Serializers for the menu API.
 
 from rest_framework import serializers
 
-from menu.models import Menu
+from menu.models import Dish, Menu
+
+
+class DishSerializer(serializers.ModelSerializer):
+    """Serializer for dishes."""
+
+    class Meta:
+        model = Dish
+        fields = (
+            "id",
+            "menu",
+            "name",
+            "description",
+            "price",
+            "prep_time",
+            "is_vegetarian",
+            "image",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "created_at", "updated_at")
+
+
+class DishImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to dishes."""
+
+    class Meta:
+        model = Dish
+        fields = ("id", "image")
+        read_only_fields = ("id",)
 
 
 class MenuSerializer(serializers.ModelSerializer):
@@ -29,8 +58,7 @@ class MenuSerializer(serializers.ModelSerializer):
 class MenuDetailSerializer(MenuSerializer):
     """Serializer for the Menu Detail object."""
 
-    # Tu w przyszłości dodam listę dań:
-    # dishes = DishSerializer(many=True, read_only=True)
+    dishes = DishSerializer(many=True, read_only=True)
 
     class Meta(MenuSerializer.Meta):
-        pass
+        fields = (*MenuSerializer.Meta.fields, "dishes")
