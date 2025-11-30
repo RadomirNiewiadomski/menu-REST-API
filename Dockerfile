@@ -24,7 +24,7 @@ RUN if [ "$DEV" = "true" ]; then \
 COPY . .
 
 # Create a non-root user for security
-RUN adduser --disabled-password --no-create-home django-user
+RUN adduser --disabled-password --gecos "" django-user
 USER django-user
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.wsgi:application"]
