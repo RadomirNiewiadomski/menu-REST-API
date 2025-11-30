@@ -41,14 +41,19 @@ class TestPublicMenuApi:
 
     def test_retrieve_menus_public(self, client):
         """Test that authentication is NOT required for retrieving menus list."""
-        Menu.objects.create(name="Menu 1", description="Desc 1")
+        menu = Menu.objects.create(name="Menu 1", description="Desc 1")
+        Dish.objects.create(menu=menu, name="D1", price=10, prep_time=5)
+
         res = client.get(MENU_URL)
 
         assert res.status_code == status.HTTP_200_OK
+        assert len(res.data) == 1
 
     def test_get_menu_detail(self, client):
         """Test get menu detail - public."""
         menu = Menu.objects.create(name="Detail Menu", description="Detail Desc")
+        Dish.objects.create(menu=menu, name="D1", price=10, prep_time=5)
+
         url = detail_url(menu.id)
 
         res = client.get(url)
@@ -67,7 +72,10 @@ class TestPublicMenuApi:
     def test_retrieve_menus_filtered_by_name(self, client):
         """Test filtering menus by name."""
         m1 = Menu.objects.create(name="Vegetarian", description="No meat")
+        Dish.objects.create(menu=m1, name="D1", price=10, prep_time=5)
+
         m2 = Menu.objects.create(name="Carnivore", description="Meat only")
+        Dish.objects.create(menu=m2, name="D2", price=10, prep_time=5)
 
         res = client.get(MENU_URL, {"name": "Vegetarian"})
 
@@ -79,35 +87,40 @@ class TestPublicMenuApi:
     def test_retrieve_menus_search(self, client):
         """Test searching menus."""
         m1 = Menu.objects.create(name="Lunch Special", description="Cheap")
+        Dish.objects.create(menu=m1, name="D1", price=10, prep_time=5)
+
         m2 = Menu.objects.create(name="Dinner Deluxe", description="Expensive")
+        Dish.objects.create(menu=m2, name="D2", price=10, prep_time=5)
 
         res = client.get(MENU_URL, {"search": "Lunch"})
+
         assert len(res.data) == 1
         assert res.data[0]["name"] == m1.name
-        assert m2.name not in [res.data[0]["name"]]
+        assert m2.name != res.data[0]["name"]
 
     def test_sort_menus_by_dishes_count(self, client):
         """Test sorting menus by number of dishes."""
-        m_empty = Menu.objects.create(name="Empty")
-        m_full = Menu.objects.create(name="Full")
+        m_less = Menu.objects.create(name="Less")
+        Dish.objects.create(menu=m_less, name="D1", price=10, prep_time=5)
 
-        Dish.objects.create(menu=m_full, name="D1", price=10, prep_time=5)
-        Dish.objects.create(menu=m_full, name="D2", price=10, prep_time=5)
+        m_more = Menu.objects.create(name="More")
+        Dish.objects.create(menu=m_more, name="D1", price=10, prep_time=5)
+        Dish.objects.create(menu=m_more, name="D2", price=10, prep_time=5)
 
         res = client.get(MENU_URL, {"ordering": "-dishes_count"})
 
         assert res.status_code == status.HTTP_200_OK
         assert len(res.data) == 2
-        assert res.data[0]["name"] == m_full.name
-        assert res.data[1]["name"] == m_empty.name
+        assert res.data[0]["name"] == m_more.name
+        assert res.data[1]["name"] == m_less.name
 
-    def test_list_menus_only_non_empty(self, client):
-        """Test listing only non-empty menus (optional requirement check)."""
+    def test_list_menus_only_non_empty_by_default(self, client):
+        """Test listing only non-empty menus by default for public users."""
         m_empty = Menu.objects.create(name="Empty")
         m_full = Menu.objects.create(name="Full")
         Dish.objects.create(menu=m_full, name="D1", price=10, prep_time=5)
 
-        res = client.get(MENU_URL, {"non_empty": "1"})
+        res = client.get(MENU_URL)
 
         assert len(res.data) == 1
         assert res.data[0]["name"] == m_full.name
@@ -175,3 +188,17 @@ class TestPrivateMenuApi:
 
         assert res.status_code == status.HTTP_204_NO_CONTENT
         assert Menu.objects.filter(id=menu.id).exists() is False
+
+    def test_retrieve_all_menus_including_empty(self, auth_client):
+        """Test retrieving all menus (even empty ones) for authenticated users."""
+        m_empty = Menu.objects.create(name="Empty")
+        m_full = Menu.objects.create(name="Full")
+        Dish.objects.create(menu=m_full, name="D1", price=10, prep_time=5)
+
+        res = auth_client.get(MENU_URL)
+
+        assert res.status_code == status.HTTP_200_OK
+        assert len(res.data) == 2
+        names = [menu["name"] for menu in res.data]
+        assert m_empty.name in names
+        assert m_full.name in names

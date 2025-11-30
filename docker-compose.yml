@@ -10,6 +10,7 @@ services:
       - .:/app  # Map the entire current directory to enable Hot Reload for all files
     command: >
       sh -c "python manage.py migrate &&
+             python manage.py setup_sample_data &&
              python manage.py runserver 0.0.0.0:8000"
     environment:
       - DATABASE_URL=postgres://postgres:supersecretpassword@db:5432/app_db

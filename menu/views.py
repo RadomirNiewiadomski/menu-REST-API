@@ -49,9 +49,8 @@ class MenuViewSet(viewsets.ModelViewSet):
         """Extend queryset to handle custom logic."""
         queryset = self.queryset
 
-        # Obsługa parametru ?non_empty=1
-        non_empty = self.request.query_params.get("non_empty")
-        if non_empty == "1" or non_empty == "true":
+        # If the user is anonymous, we only show menus with dishes
+        if self.request.user.is_anonymous:
             queryset = queryset.filter(dishes__isnull=False).distinct()
 
         return queryset
