@@ -21,6 +21,40 @@ services:
       db:
         condition: service_healthy
 
+  celery_worker:
+    build:
+      context: .
+      args:
+        - DEV=true
+    command: celery -A app worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgres://postgres:supersecretpassword@db:5432/app_db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DJANGO_DEBUG=1
+      - DJANGO_SECRET_KEY=dev_secret_key
+    depends_on:
+      - app
+      - redis
+
+  celery_beat:
+    build:
+      context: .
+      args:
+        - DEV=true
+    command: celery -A app beat --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgres://postgres:supersecretpassword@db:5432/app_db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DJANGO_DEBUG=1
+      - DJANGO_SECRET_KEY=dev_secret_key
+    depends_on:
+      - app
+      - redis
+
   db:
     image: postgres:17-alpine
     restart: always
@@ -37,6 +71,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: "redis:alpine"
 
 volumes:
   postgres_data:
