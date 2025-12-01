@@ -14,6 +14,7 @@ from rest_framework.test import APIClient
 
 from menu.models import Dish, Menu
 from menu.serializers import DishSerializer
+from user.models import User
 
 DISHES_URL = reverse("menu:dish-list")
 
@@ -29,17 +30,17 @@ def image_upload_url(dish_id):
 
 
 @pytest.fixture
-def client():
+def client() -> APIClient:
     return APIClient()
 
 
 @pytest.fixture
-def user():
+def user() -> User:
     return get_user_model().objects.create_user("test@example.com", "password123", name="Test User")
 
 
 @pytest.fixture
-def menu():
+def menu() -> Menu:
     """Fixture creating a menu to link dishes to."""
     return Menu.objects.create(name="Main Menu", description="Main stuff")
 

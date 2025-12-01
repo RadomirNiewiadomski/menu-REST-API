@@ -16,7 +16,7 @@ ME_URL = reverse("user:me")
 
 
 @pytest.fixture
-def client():
+def client() -> APIClient:
     """Fixture for APIClient."""
     return APIClient()
 

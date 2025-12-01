@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 
 from menu.models import Dish, Menu
 from menu.serializers import MenuSerializer
+from user.models import User
 
 MENU_URL = reverse("menu:menu-list")
 
@@ -26,7 +27,7 @@ def client() -> APIClient:
 
 
 @pytest.fixture
-def user() -> get_user_model():
+def user() -> User:
     """Fixture for creating a test user."""
     return get_user_model().objects.create_user(
         "test@example.com",

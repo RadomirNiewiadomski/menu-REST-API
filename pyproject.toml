@@ -33,6 +33,7 @@ dev = [
     "ruff>=0.14.7",
     "types-pyyaml>=6.0.12.20250915",
     "types-requests>=2.32.4.20250913",
+    "types-django-filter>=25.2",
     "celery>=5.5.3",
     "redis>=7.1.0",
 ]
@@ -103,3 +104,10 @@ plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 
 [tool.django-stubs]
 django_settings_module = "app.settings"
+
+[[tool.mypy.overrides]]
+module = [
+    "celery.*",
+    "environ.*",
+]
+ignore_missing_imports = true

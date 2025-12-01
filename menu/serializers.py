@@ -61,4 +61,4 @@ class MenuDetailSerializer(MenuSerializer):
     dishes = DishSerializer(many=True, read_only=True)
 
     class Meta(MenuSerializer.Meta):
-        fields = (*MenuSerializer.Meta.fields, "dishes")
+        fields = (*MenuSerializer.Meta.fields, "dishes")  # type: ignore

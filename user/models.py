@@ -2,7 +2,7 @@
 Database models for the User app.
 """
 
-from typing import Any
+from typing import Any, cast
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -19,7 +19,7 @@ class UserManager(BaseUserManager):
         """Create and return a new user."""
         if not email:
             raise ValueError("User must have an email address.")
-        user = self.model(email=self.normalize_email(email), **extra_fields)
+        user = cast("User", self.model(email=self.normalize_email(email), **extra_fields))
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -40,7 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     objects = UserManager()
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ()
+    REQUIRED_FIELDS = ()  # type: ignore
 
     def __str__(self) -> str:
         return self.email
