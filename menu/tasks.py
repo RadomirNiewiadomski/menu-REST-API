@@ -23,7 +23,7 @@ def send_daily_menu_report():
     yesterday_start = yesterday.replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday_end = yesterday.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    new_dishes = Dish.objects.filter(created_at__range=(yesterday_start, yesterday_end))
+    new_dishes = Dish.objects.select_related("menu").filter(created_at__range=(yesterday_start, yesterday_end))
 
     modified_dishes = Dish.objects.filter(updated_at__range=(yesterday_start, yesterday_end)).exclude(
         id__in=new_dishes.values("id")

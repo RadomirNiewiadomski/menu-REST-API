@@ -22,7 +22,7 @@ class MenuViewSet(viewsets.ModelViewSet):
     """View for managing menu APIs."""
 
     serializer_class = MenuSerializer
-    queryset = Menu.objects.annotate(dishes_count=Count("dishes")).prefetch_related("dishes").order_by("id")
+    queryset = Menu.objects.annotate(dishes_count=Count("dishes")).order_by("id")
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     filter_backends = (
@@ -49,6 +49,8 @@ class MenuViewSet(viewsets.ModelViewSet):
         """Extend queryset to handle custom logic."""
         queryset = self.queryset
 
+        if self.action == "retrieve":
+            queryset = queryset.prefetch_related("dishes")
         # If the user is anonymous, we only show menus with dishes
         if self.request.user.is_anonymous:
             queryset = queryset.filter(dishes__isnull=False).distinct()
@@ -66,7 +68,8 @@ class DishViewSet(viewsets.ModelViewSet):
     """View for managing dish APIs."""
 
     serializer_class = DishSerializer
-    queryset = Dish.objects.all().order_by("id")
+    # select_related retrieves Menu data in one query (future proofing)
+    queryset = Dish.objects.select_related("menu").all().order_by("id")
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     filter_backends = (
