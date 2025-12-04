@@ -39,7 +39,7 @@ The system allows restaurants to manage their menu cards and share them with cli
 
     ```bash
     git clone https://github.com/RadomirNiewiadomski/menu-REST-API.git
-    cd menu-rest-api
+    cd menu-REST-API
     ```
 
 
