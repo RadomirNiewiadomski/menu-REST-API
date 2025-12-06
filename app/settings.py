@@ -24,6 +24,8 @@ env = environ.Env(
     DJANGO_DEBUG=(bool, False),
     DJANGO_ALLOWED_HOSTS=(list, []),
     DATABASE_URL=(str, "sqlite:///db.sqlite3"),
+    CELERY_BROKER_URL=(str, "redis://redis:6379/0"),
+    CELERY_RESULT_BACKEND=(str, "redis://redis:6379/0"),
 )
 env.read_env(BASE_DIR / ".env")
 
@@ -150,7 +152,6 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
 }
 
-# Konfiguracja samej dokumentacji
 SPECTACULAR_SETTINGS = {
     "TITLE": "Menu API",
     "DESCRIPTION": "API for Menu Project using Django 5.2 & DRF",
@@ -166,15 +167,14 @@ SIMPLE_JWT = {
 }
 
 # --- EMAIL CONFIGURATION ---
-# For development, we print emails to the console
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = "localhost"
 EMAIL_PORT = 1025
 
 
 # --- CELERY CONFIGURATION ---
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://redis:6379/0")
-CELERY_RESULT_BACKEND = env("CELERY_BROKER_URL", default="redis://redis:6379/0")
+CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
@@ -182,6 +182,6 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULE = {
     "send-daily-menu-report-at-10am": {
         "task": "menu.tasks.send_daily_menu_report",
-        "schedule": crontab(hour=10, minute=0),  # Codziennie o 10:00
+        "schedule": crontab(hour=10, minute=0),
     },
 }
