@@ -68,19 +68,19 @@ The project maintains high test coverage (unit and integration tests).
 **Run all tests:**
 
 ```bash
-docker compose run --rm app sh -c "uv run pytest"
+docker compose run --rm app uv run pytest
 ```
 
 **Check static typing (mypy):**
 
 ```bash
-docker compose run --rm app sh -c "uv run mypy ."
+docker compose run --rm app uv run mypy .
 ```
 
 **Check code style (ruff):**
 
 ```bash
-docker compose run --rm app sh -c "uv run ruff check ."
+docker compose run --rm app uv run ruff check .
 ```
 
 -----
