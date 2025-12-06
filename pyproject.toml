@@ -17,6 +17,7 @@ dependencies = [
     "psycopg[binary]>=3.2.13",
     "celery>=5.5.3",
     "redis>=7.1.0",
+    "flower>=2.0.0",
 ]
 
 [dependency-groups]
